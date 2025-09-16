@@ -1,0 +1,1206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Crypto Journal - Professional</title>
+  <!-- CDN for Decimal.js -->
+  <script src="https://cdn.jsdelivr.net/npm/decimal.js@10/decimal.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1724;
+      --card: #0b1220;
+      --accent: #06b6d4;
+      --accent-light: #22d3ee;
+      --muted: #94a3b8;
+      --glass: rgba(255,255,255,0.03);
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', ui-sans-serif, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #071126 0%, #071727 100%);
+      color: #e6eef6;
+      min-height: 100vh;
+    }
+    header {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .logo {
+      font-weight: 800;
+      font-size: 1.35rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .logo::before {
+      content: "📊";
+    }
+    .container {
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.5rem;
+    }
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+      .right-col {
+        order: 2;
+      }
+    }
+    .card {
+      background: var(--card);
+      padding: 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.6);
+    }
+    h3 {
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    h3::before {
+      font-size: 1.2rem;
+    }
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      background: var(--glass);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: inherit;
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s ease;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1);
+    }
+    .row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    button {
+      background: var(--accent);
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      color: #042028;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    button:hover {
+      background: var(--accent-light);
+      transform: translateY(-1px);
+    }
+    button.danger {
+      background: var(--danger);
+      color: white;
+    }
+    button.danger:hover {
+      background: #f87171;
+    }
+    button.success {
+      background: var(--success);
+      color: white;
+    }
+    button.success:hover {
+      background: #34d399;
+    }
+    input, select {
+      padding: 0.75rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: var(--glass);
+      color: inherit;
+      transition: border-color 0.2s ease;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      font-size: 0.95rem;
+    }
+    th {
+      color: var(--muted);
+      text-align: left;
+      font-weight: 500;
+    }
+    .muted {
+      color: var(--muted);
+    }
+    .small {
+      font-size: 0.9rem;
+    }
+    .flex {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .summary {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .card-sm {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      padding: 1rem;
+      border-radius: 12px;
+      min-width: 140px;
+      flex: 1;
+      transition: transform 0.2s ease;
+    }
+    .card-sm:hover {
+      transform: translateY(-3px);
+    }
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .footer {
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--muted);
+      margin-top: 2rem;
+    }
+    /* Table scrolling */
+    .table-scroll {
+      max-height: 400px;
+      overflow: auto;
+      border-radius: 8px;
+      margin: 0.5rem 0;
+    }
+    /* Positive/Negative coloring */
+    .positive {
+      color: var(--success);
+      font-weight: 600;
+    }
+    .negative {
+      color: var(--danger);
+      font-weight: 600;
+    }
+    /* Animation for new items */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    /* Icons and emojis */
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Loading indicator */
+    .loader {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-top: 2px solid var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* Toast notifications */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      background: var(--card);
+      border-left: 4px solid var(--accent);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      z-index: 1000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .toast.success {
+      border-left-color: var(--success);
+    }
+    .toast.error {
+      border-left-color: var(--danger);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Crypto Journal Pro</div>
+    <div class="muted small">Paste receipts, auto-parse, FIFO/LIFO matching, high-precision calculations 💰</div>
+  </header>
+
+  <main class="container">
+    <section class="left-col">
+      <div class="card">
+        <h3>📥 Add Receipt</h3>
+        <div class="small muted">Paste any exchange receipt (buy or sell) then click Parse → Review → Save</div>
+        <textarea id="receiptInput" placeholder="Paste your receipt text here..."></textarea>
+        <div style="margin-top: 1rem" class="row">
+          <select id="assetSelect">
+            <option>ETH</option>
+            <option>BTC</option>
+            <option>SOL</option>
+            <option>AVAX</option>
+            <option>USDT</option>
+            <option>USDC</option>
+          </select>
+          <button id="parseBtn">🔍 Parse Receipt</button>
+          <button id="clearBtn" class="danger">🗑️ Clear</button>
+        </div>
+        <div id="parsePreview" style="margin-top: 1rem; display: none;" class="card">
+          <h4>👀 Preview</h4>
+          <div id="previewList"></div>
+          <div class="row" style="margin-top: 1rem">
+            <button id="saveParsed" class="success">💾 Save to Journal</button>
+            <button id="editParsed" class="muted">✏️ Edit before save</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1.5rem">
+        <h3>📋 Transactions</h3>
+        <div class="table-scroll">
+          <table id="txTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Pair</th>
+                <th>Dir</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Order Value</th>
+                <th>Fee</th>
+                <th>P/L</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div style="margin-top: 1rem" class="controls">
+          <button id="exportCsv">📊 Export CSV</button>
+          <button id="exportJson">💾 Export JSON</button>
+          <input type="file" id="importFile" accept=".json" style="display: none;" />
+          <button id="importBtn">📤 Import</button>
+          <button id="resetStore" class="danger">🔄 Reset Storage</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="right-col">
+      <div class="card">
+        <h3>📈 Dashboard</h3>
+        <div class="summary" style="margin-bottom: 1rem">
+          <div class="card-sm">
+            <div class="muted small">Realized P/L</div>
+            <div id="realizedPl">0 USDT</div>
+          </div>
+          <div class="card-sm">
+            <div class="muted small">Total Fees</div>
+            <div id="totalFees">0 USDT</div>
+          </div>
+          <div class="card-sm">
+            <div class="muted small">Open Position</div>
+            <div id="openPos">0 ETH</div>
+          </div>
+        </div>
+        <div class="card-sm" style="margin-top: 0.5rem">
+          <div class="muted small">Unrealized P/L</div>
+          <div id="unrealizedPl">0 USDT</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1.5rem">
+        <h3>⚙️ Settings</h3>
+        <div class="small muted">Matching Method</div>
+        <select id="matchingMode">
+          <option value="fifo">FIFO (First In, First Out)</option>
+          <option value="lifo">LIFO (Last In, First Out)</option>
+        </select>
+        <div style="margin-top: 0.75rem" class="small muted">Quote Currency</div>
+        <select id="quoteCurrency">
+          <option>USDT</option>
+          <option>USD</option>
+          <option>USDC</option>
+        </select>
+        <div style="margin-top: 0.75rem" class="small muted">Date Format</div>
+        <select id="dateFormat">
+          <option value="local">Local Format</option>
+          <option value="iso">ISO Format</option>
+        </select>
+      </div>
+    </aside>
+  </main>
+
+  <div class="footer">Crypto Journal Pro — Advanced trading analytics with precision calculations 🚀</div>
+
+  <!-- Toast notification element -->
+  <div id="toast" class="toast">
+    <span id="toastMessage"></span>
+  </div>
+
+  <script>
+  // Enhanced Crypto Journal with accurate calculations and improved UI
+  const STORAGE_KEY = 'cryptoJournal_pro_v2';
+  
+  // Load or initialize store
+  let store = { 
+    transactions: [], 
+    buysRemaining: [],
+    settings: {
+      matchingMode: 'fifo',
+      quoteCurrency: 'USDT',
+      dateFormat: 'local'
+    }
+  };
+  
+  // Decimal.js convenience function
+  function D(v) { 
+    try { 
+      if (v instanceof Decimal) return v;
+      return new Decimal(v || 0); 
+    } catch(e) { 
+      console.error("Decimal conversion error:", e, "value:", v);
+      return new Decimal(0); 
+    } 
+  }
+
+  // Format numbers with commas and fixed decimals
+  function formatNumber(value, decimals = 8) {
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(num)) return '0';
+    
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: decimals
+    }).format(num);
+  }
+
+  // Show toast notification
+  function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+    
+    toastMessage.textContent = message;
+    toast.className = `toast ${type} show`;
+    
+    setTimeout(() => {
+      toast.className = 'toast';
+    }, 3000);
+  }
+
+  // Save store to localStorage
+  function saveStore() { 
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); 
+  }
+
+  // Load store from localStorage
+  function loadStore() { 
+    const s = localStorage.getItem(STORAGE_KEY); 
+    if (s) { 
+      try { 
+        const parsed = JSON.parse(s);
+        store = parsed;
+        
+        // Initialize settings if they don't exist
+        if (!store.settings) {
+          store.settings = {
+            matchingMode: 'fifo',
+            quoteCurrency: 'USDT',
+            dateFormat: 'local'
+          };
+        }
+        
+        // Update UI to reflect stored settings
+        if (document.getElementById('matchingMode')) {
+          document.getElementById('matchingMode').value = store.settings.matchingMode;
+        }
+        if (document.getElementById('quoteCurrency')) {
+          document.getElementById('quoteCurrency').value = store.settings.quoteCurrency;
+        }
+        if (document.getElementById('dateFormat')) {
+          document.getElementById('dateFormat').value = store.settings.dateFormat;
+        }
+      } catch(e) { 
+        console.error('Parse error', e); 
+        store = { transactions: [], buysRemaining: [], settings: {
+          matchingMode: 'fifo',
+          quoteCurrency: 'USDT',
+          dateFormat: 'local'
+        }}; 
+      } 
+    } else { 
+      store = { transactions: [], buysRemaining: [], settings: {
+        matchingMode: 'fifo',
+        quoteCurrency: 'USDT',
+        dateFormat: 'local'
+      }}; 
+    } 
+  }
+
+  // Generate unique ID
+  function uid(prefix = 'id') { 
+    return prefix + '_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now().toString(36);
+  }
+
+  // Parse receipt text with improved pattern matching
+  function parseReceipt(text, defaultAsset = 'ETH') {
+    if (!text || text.trim().length === 0) {
+      showToast('No receipt text to parse', 'error');
+      return [];
+    }
+    
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    const joined = text.toLowerCase();
+    
+    // Try to detect exchange format
+    let exchange = 'unknown';
+    if (joined.includes('binance')) exchange = 'binance';
+    else if (joined.includes('kraken')) exchange = 'kraken';
+    else if (joined.includes('coinbase')) exchange = 'coinbase';
+    else if (joined.includes('kucoin')) exchange = 'kucoin';
+    
+    // Extract direction (buy/sell)
+    let direction = null;
+    if (joined.match(/buy|bought|bid/i) && !joined.match(/sell|sold|ask/i)) direction = 'buy';
+    else if (joined.match(/sell|sold|ask/i) && !joined.match(/buy|bought|bid/i)) direction = 'sell';
+    else {
+      // Fallback: if we can't determine, check for keywords
+      if (joined.includes('market buy') || joined.includes('limit buy')) direction = 'buy';
+      else if (joined.includes('market sell') || joined.includes('limit sell')) direction = 'sell';
+    }
+    
+    // Extract trading pair
+    let pair = null;
+    const pairMatch = joined.match(/([a-z]{3,5})\/(usdt|usd|btc|eth)/i) || 
+                     joined.match(/([A-Z]{3,5}-[A-Z]{3,5})/) ||
+                     joined.match(/([A-Z]{3,5}\s*[A-Z]{3,5})/);
+    
+    if (pairMatch) {
+      pair = pairMatch[0].toUpperCase().replace(/-/g, '/').replace(/\s+/g, '/');
+    } else {
+      pair = defaultAsset + '/USDT';
+    }
+    
+    const [base, quote] = pair.split('/');
+    
+    // Extract price - look for various patterns
+    let price = null;
+    const pricePatterns = [
+      /price[\s:]*([0-9,.]+)/i,
+      /avg[\s\S]*?price[\s:]*([0-9,.]+)/i,
+      /@[\s]*([0-9,.]+)/,
+      /rate[\s:]*([0-9,.]+)/i,
+      /limit price[\s:]*([0-9,.]+)/i,
+      /filled[\s\S]*?price[\s:]*([0-9,.]+)/i
+    ];
+    
+    for (const pattern of pricePatterns) {
+      const match = joined.match(pattern);
+      if (match) {
+        price = match[1].replace(/,/g, '');
+        break;
+      }
+    }
+    
+    // Extract quantity
+    let qty = null;
+    const qtyPatterns = [
+      /quantity[\s:]*([0-9,.]+)/i,
+      /amount[\s:]*([0-9,.]+)/i,
+      /filled[\s\S]*?amount[\s:]*([0-9,.]+)/i,
+      /qty[\s:]*([0-9,.]+)/i,
+      /([0-9,.]+)\s*(?=eth|btc|usdt|usdc|sol|avax)/i
+    ];
+    
+    for (const pattern of qtyPatterns) {
+      const match = joined.match(pattern);
+      if (match) {
+        qty = match[1].replace(/,/g, '');
+        break;
+      }
+    }
+    
+    // Extract fee
+    let fee = null;
+    let feeCurrency = null;
+    const feeMatch = joined.match(/fee[\s:]*([0-9,.]+)\s*([a-z]*)/i);
+    if (feeMatch) {
+      fee = feeMatch[1].replace(/,/g, '');
+      feeCurrency = feeMatch[2] ? feeMatch[2].toUpperCase() : quote;
+    }
+    
+    // Extract order value (total cost/proceeds)
+    let filledValue = null;
+    const valueMatch = joined.match(/(total|value)[\s:]*([0-9,.]+)/i);
+    if (valueMatch) {
+      filledValue = valueMatch[2].replace(/,/g, '');
+    } else if (price && qty) {
+      // Calculate if we have price and quantity
+      filledValue = D(price).times(D(qty)).toString();
+    }
+    
+    // Extract timestamp
+    let timestamp = new Date().toISOString();
+    const datePatterns = [
+      /(\d{4}[-/]\d{2}[-/]\d{2}[\sT]\d{2}:\d{2}:\d{2})/,
+      /(\d{2}[-/]\d{2}[-/]\d{4}[\sT]\d{2}:\d{2}:\d{2})/,
+      /(\w+ \d{1,2}, \d{4} \d{1,2}:\d{2}:\d{2} (AM|PM))/i,
+      /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)/
+    ];
+    
+    for (const pattern of datePatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        try {
+          const date = new Date(match[1]);
+          if (!isNaN(date.getTime())) {
+            timestamp = date.toISOString();
+            break;
+          }
+        } catch (e) {
+          // Ignore and continue
+        }
+      }
+    }
+    
+    // Extract order ID
+    let orderId = null;
+    const idMatch = joined.match(/(order|id|txn|transaction)[\s:#]*([a-z0-9]+)/i);
+    if (idMatch) {
+      orderId = idMatch[2];
+    }
+    
+    // If we couldn't extract critical information, try a different approach
+    if ((!price || !qty) && exchange === 'binance') {
+      // Try Binance-specific parsing
+      const binanceMatch = text.match(/(\d+\.\d+)\s+(\w+)\s+@\s+(\d+\.\d+)/i);
+      if (binanceMatch && binanceMatch.length >= 4) {
+        qty = binanceMatch[1];
+        const asset = binanceMatch[2];
+        price = binanceMatch[3];
+        
+        if (!pair) {
+          pair = `${asset.toUpperCase()}/${quote}`;
+        }
+      }
+    }
+    
+    // If we still don't have required values, show an error
+    if (!price || !qty) {
+      showToast('Could not extract required data from receipt', 'error');
+      return [];
+    }
+    
+    // Create transaction object
+    const tx = {
+      id: uid('tx'),
+      orderId: orderId,
+      pair: pair,
+      base: base,
+      quote: quote,
+      direction: direction || 'buy', // Default to buy if we can't determine
+      price: price,
+      qty: qty,
+      filledValue: filledValue,
+      fee: fee,
+      feeCurrency: feeCurrency || quote,
+      timestamp: timestamp,
+      rawText: text,
+      matched: []
+    };
+    
+    return [tx];
+  }
+
+  // Add transactions to store and perform matching
+  function addTransactions(txs) {
+    if (!txs || txs.length === 0) return;
+    
+    // Ensure all values are properly formatted as strings
+    txs.forEach(t => {
+      t.price = D(t.price).toString();
+      t.qty = D(t.qty).toString();
+      t.fee = t.fee ? D(t.fee).toString() : null;
+      t.filledValue = t.filledValue ? D(t.filledValue).toString() : null;
+    });
+    
+    // Add to transactions array
+    store.transactions.push(...txs);
+    
+    // Rebuild buys remaining and perform matching
+    rebuildBuysRemaining();
+    performMatching();
+    
+    // Save and update UI
+    saveStore();
+    renderAll();
+    
+    // Show success message
+    showToast(`Added ${txs.length} transaction${txs.length > 1 ? 's' : ''} successfully!`, 'success');
+  }
+
+  // Rebuild buys remaining from transactions
+  function rebuildBuysRemaining() {
+    // Reset buys remaining
+    store.buysRemaining = [];
+    
+    // Get all buy transactions
+    const buys = store.transactions.filter(t => t.direction === 'buy');
+    
+    // For each buy, calculate remaining quantity
+    buys.forEach(buy => {
+      const matchedQty = buy.matched.reduce((acc, m) => acc.plus(D(m.qty)), D(0));
+      const remaining = D(buy.qty).minus(matchedQty);
+      
+      if (remaining.gt(0)) {
+        store.buysRemaining.push({
+          txId: buy.id,
+          remaining: remaining.toString(),
+          price: buy.price,
+          timestamp: buy.timestamp
+        });
+      }
+    });
+    
+    // Sort by timestamp based on matching mode
+    const mode = store.settings.matchingMode || 'fifo';
+    store.buysRemaining.sort((a, b) => {
+      const dateA = new Date(a.timestamp);
+      const dateB = new Date(b.timestamp);
+      return mode === 'fifo' ? dateA - dateB : dateB - dateA;
+    });
+  }
+
+  // Perform matching between buys and sells
+  function performMatching() {
+    const mode = store.settings.matchingMode || 'fifo';
+    
+    // Reset all matches first
+    store.transactions.forEach(t => {
+      t.matched = [];
+      if (t.direction === 'buy') {
+        t.remaining = t.qty;
+      }
+    });
+    
+    // Rebuild buys remaining
+    rebuildBuysRemaining();
+    
+    // Get all sell transactions sorted by date
+    const sells = store.transactions
+      .filter(t => t.direction === 'sell')
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    
+    // Process each sell
+    sells.forEach(sell => {
+      let remainingToMatch = D(sell.qty);
+      
+      // Try to match with available buys
+      for (let i = 0; i < store.buysRemaining.length && remainingToMatch.gt(0); i++) {
+        const buyRemaining = store.buysRemaining[i];
+        const buyTx = store.transactions.find(t => t.id === buyRemaining.txId);
+        
+        if (!buyTx) continue;
+        
+        const availableQty = D(buyRemaining.remaining);
+        const matchQty = Decimal.min(availableQty, remainingToMatch);
+        
+        if (matchQty.lte(0)) continue;
+        
+        // Calculate P/L for this match
+        const buyPrice = D(buyTx.price);
+        const sellPrice = D(sell.price);
+        const costBasis = matchQty.times(buyPrice);
+        const proceeds = matchQty.times(sellPrice);
+        const grossPL = proceeds.minus(costBasis);
+        
+        // Calculate fees (if any)
+        let feeImpact = D(0);
+        
+        // Buy fee impact (converted to quote currency)
+        if (buyTx.fee) {
+          if ((buyTx.feeCurrency || '').toUpperCase() === buyTx.base.toUpperCase()) {
+            // Fee in base currency - convert to quote using buy price
+            feeImpact = feeImpact.minus(D(buyTx.fee).times(matchQty.div(buyTx.qty)).times(buyPrice));
+          } else {
+            // Fee in quote currency
+            feeImpact = feeImpact.minus(D(buyTx.fee).times(matchQty.div(buyTx.qty)));
+          }
+        }
+        
+        // Sell fee impact
+        if (sell.fee) {
+          if ((sell.feeCurrency || '').toUpperCase() === sell.base.toUpperCase()) {
+            // Fee in base currency - convert to quote using sell price
+            feeImpact = feeImpact.minus(D(sell.fee).times(matchQty.div(sell.qty)).times(sellPrice));
+          } else {
+            // Fee in quote currency
+            feeImpact = feeImpact.minus(D(sell.fee).times(matchQty.div(sell.qty)));
+          }
+        }
+        
+        // Total P/L for this match
+        const realizedPL = grossPL.plus(feeImpact);
+        
+        // Create match record
+        const matchRecord = {
+          to: sell.direction === 'sell' ? buyTx.id : sell.id,
+          qty: matchQty.toString(),
+          realized: realizedPL.toString(),
+          cost: costBasis.toString(),
+          proceeds: proceeds.toString(),
+          feeImpact: feeImpact.toString(),
+          timestamp: new Date().toISOString()
+        };
+        
+        // Add to both transactions
+        buyTx.matched.push({ ...matchRecord, to: sell.id });
+        sell.matched.push({ ...matchRecord, to: buyTx.id });
+        
+        // Update remaining quantities
+        remainingToMatch = remainingToMatch.minus(matchQty);
+        buyRemaining.remaining = availableQty.minus(matchQty).toString();
+        
+        // Update the buy transaction's remaining field
+        if (buyTx.remaining) {
+          buyTx.remaining = D(buyTx.remaining).minus(matchQty).toString();
+        } else {
+          buyTx.remaining = availableQty.minus(matchQty).toString();
+        }
+      }
+      
+      // If there's still remaining to match, mark as unmatched
+      if (remainingToMatch.gt(0)) {
+        sell.unmatchedQty = remainingToMatch.toString();
+      }
+    });
+    
+    // Filter out buys with no remaining quantity
+    store.buysRemaining = store.buysRemaining.filter(b => D(b.remaining).gt(0));
+    
+    // Save updated store
+    saveStore();
+  }
+
+  // Render transactions table
+  function renderTransactions() {
+    const tbody = document.querySelector('#txTable tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    // Sort transactions by timestamp (newest first)
+    const sorted = [...store.transactions].sort((a, b) => 
+      new Date(b.timestamp) - new Date(a.timestamp)
+    );
+    
+    sorted.forEach(tx => {
+      const tr = document.createElement('tr');
+      tr.className = 'fade-in';
+      
+      // Format date based on settings
+      let dateFormatted;
+      if (store.settings.dateFormat === 'iso') {
+        dateFormatted = new Date(tx.timestamp).toISOString().slice(0, 19).replace('T', ' ');
+      } else {
+        dateFormatted = new Date(tx.timestamp).toLocaleString();
+      }
+      
+      // Calculate remaining for buys
+      let remaining = '-';
+      if (tx.direction === 'buy') {
+        const matchedQty = tx.matched.reduce((acc, m) => acc.plus(D(m.qty)), D(0));
+        remaining = D(tx.qty).minus(matchedQty).toString();
+      }
+      
+      // Calculate P/L for sells
+      let pl = '-';
+      if (tx.direction === 'sell') {
+        pl = tx.matched.reduce((acc, m) => acc.plus(D(m.realized)), D(0)).toString();
+      }
+      
+      // Format numbers
+      const formattedQty = formatNumber(tx.qty);
+      const formattedPrice = formatNumber(tx.price);
+      const formattedOrderValue = tx.filledValue ? formatNumber(tx.filledValue) : formatNumber(D(tx.qty).times(D(tx.price)));
+      const formattedFee = tx.fee ? formatNumber(tx.fee) + ' ' + (tx.feeCurrency || '') : '-';
+      const formattedPL = pl !== '-' ? formatNumber(pl) : '-';
+      
+      // Determine PL color
+      const plClass = pl !== '-' ? (D(pl).gte(0) ? 'positive' : 'negative') : '';
+      
+      // Add emoji based on direction
+      const dirEmoji = tx.direction === 'buy' ? '📈' : '📉';
+      
+      tr.innerHTML = `
+        <td class="small">${dateFormatted}</td>
+        <td>${tx.pair}</td>
+        <td>${dirEmoji} ${tx.direction}</td>
+        <td>${formattedQty} ${tx.base}</td>
+        <td>${formattedPrice} ${tx.quote}</td>
+        <td>${formattedOrderValue} ${tx.quote}</td>
+        <td>${formattedFee}</td>
+        <td class="${plClass}">${formattedPL !== '-' ? formattedPL + ' ' + tx.quote : '-'}</td>
+        <td><button data-id='${tx.id}' class='delBtn danger'>🗑️</button></td>
+      `;
+      
+      tbody.appendChild(tr);
+    });
+    
+    // Add delete event listeners
+    document.querySelectorAll('.delBtn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const id = btn.dataset.id;
+        deleteTransaction(id);
+      });
+    });
+  }
+
+  // Delete a transaction
+  function deleteTransaction(id) {
+    if (!confirm('Are you sure you want to delete this transaction?')) return;
+    
+    store.transactions = store.transactions.filter(t => t.id !== id);
+    rebuildBuysRemaining();
+    performMatching();
+    saveStore();
+    renderAll();
+    
+    showToast('Transaction deleted', 'success');
+  }
+
+  // Render dashboard
+  function renderDashboard() {
+    let totalRealized = D(0);
+    let totalFees = D(0);
+    let openPosition = D(0);
+    let unrealizedPL = D(0);
+    
+    // Calculate realized P/L and fees from sells
+    store.transactions.filter(t => t.direction === 'sell').forEach(sell => {
+      sell.matched.forEach(match => {
+        totalRealized = totalRealized.plus(D(match.realized));
+      });
+    });
+    
+    // Calculate total fees and open position
+    store.transactions.forEach(tx => {
+      // Calculate fees in quote currency
+      if (tx.fee) {
+        if (tx.direction === 'buy') {
+          if ((tx.feeCurrency || '').toUpperCase() === tx.base.toUpperCase()) {
+            // Fee in base currency - convert using buy price
+            totalFees = totalFees.plus(D(tx.fee).times(D(tx.price)));
+          } else {
+            // Fee in quote currency
+            totalFees = totalFees.plus(D(tx.fee));
+          }
+        } else {
+          if ((tx.feeCurrency || '').toUpperCase() === tx.base.toUpperCase()) {
+            // Fee in base currency - convert using sell price
+            totalFees = totalFees.plus(D(tx.fee).times(D(tx.price)));
+          } else {
+            // Fee in quote currency
+            totalFees = totalFees.plus(D(tx.fee));
+          }
+        }
+      }
+      
+      // Calculate open position for buys
+      if (tx.direction === 'buy') {
+        const matchedQty = tx.matched.reduce((acc, m) => acc.plus(D(m.qty)), D(0));
+        const remaining = D(tx.qty).minus(matchedQty);
+        openPosition = openPosition.plus(remaining);
+      }
+    });
+    
+    // Calculate unrealized P/L (approximate based on current price - would need API)
+    // This is a placeholder - in a real app you would fetch current prices
+    const quoteCurrency = store.settings.quoteCurrency || 'USDT';
+    document.getElementById('realizedPl').textContent = `${formatNumber(totalRealized)} ${quoteCurrency}`;
+    document.getElementById('realizedPl').className = totalRealized.gte(0) ? 'positive' : 'negative';
+    
+    document.getElementById('totalFees').textContent = `${formatNumber(totalFees)} ${quoteCurrency}`;
+    
+    // Find the most common base asset for open position display
+    const baseCounts = {};
+    store.transactions.forEach(tx => {
+      if (tx.direction === 'buy') {
+        baseCounts[tx.base] = (baseCounts[tx.base] || 0) + 1;
+      }
+    });
+    
+    let mostCommonBase = 'ETH';
+    if (Object.keys(baseCounts).length > 0) {
+      mostCommonBase = Object.keys(baseCounts).reduce((a, b) => 
+        baseCounts[a] > baseCounts[b] ? a : b
+      );
+    }
+    
+    document.getElementById('openPos').textContent = `${formatNumber(openPosition)} ${mostCommonBase}`;
+    document.getElementById('unrealizedPl').textContent = `0 ${quoteCurrency}`; // Placeholder
+  }
+
+  // Export to CSV
+  function exportCSV() {
+    const headers = ['Date', 'Pair', 'Direction', 'Quantity', 'Price', 'Order Value', 'Fee', 'Fee Currency', 'P/L'];
+    const rows = [headers];
+    
+    store.transactions.forEach(tx => {
+      const date = new Date(tx.timestamp).toISOString();
+      const pl = tx.direction === 'sell' ? 
+        tx.matched.reduce((acc, m) => acc.plus(D(m.realized)), D(0)).toString() : 
+        '0';
+      
+      rows.push([
+        date,
+        tx.pair,
+        tx.direction,
+        tx.qty,
+        tx.price,
+        tx.filledValue || D(tx.qty).times(D(tx.price)).toString(),
+        tx.fee || '0',
+        tx.feeCurrency || '',
+        pl
+      ]);
+    });
+    
+    const csvContent = rows.map(row => 
+      row.map(field => `"${field}"`).join(',')
+    ).join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `crypto_journal_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('CSV exported successfully', 'success');
+  }
+
+  // Export to JSON
+  function exportJSON() {
+    const dataStr = JSON.stringify(store, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `crypto_journal_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('JSON exported successfully', 'success');
+  }
+
+  // Import from JSON file
+  function importJSON(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.transactions) {
+          store = data;
+          saveStore();
+          renderAll();
+          showToast('Data imported successfully', 'success');
+        } else {
+          showToast('Invalid file format', 'error');
+        }
+      } catch (err) {
+        console.error('Import error:', err);
+        showToast('Error importing file', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Reset storage
+  function resetStorage() {
+    if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
+      localStorage.removeItem(STORAGE_KEY);
+      store = { 
+        transactions: [], 
+        buysRemaining: [],
+        settings: {
+          matchingMode: 'fifo',
+          quoteCurrency: 'USDT',
+          dateFormat: 'local'
+        }
+      };
+      renderAll();
+      showToast('Data reset successfully', 'success');
+    }
+  }
+
+  // Render everything
+  function renderAll() {
+    renderTransactions();
+    renderDashboard();
+  }
+
+  // Initialize the application
+  function init() {
+    // Load stored data
+    loadStore();
+    
+    // Set up event listeners
+    document.getElementById('parseBtn').addEventListener('click', () => {
+      const text = document.getElementById('receiptInput').value.trim();
+      const defaultAsset = document.getElementById('assetSelect').value || 'ETH';
+      
+      if (!text) {
+        showToast('Please paste a receipt first', 'error');
+        return;
+      }
+      
+      const txs = parseReceipt(text, defaultAsset);
+      if (txs.length === 0) {
+        showToast('Could not parse any transactions from the receipt', 'error');
+        return;
+      }
+      
+      // Show preview
+      const preview = document.getElementById('parsePreview');
+      const list = document.getElementById('previewList');
+      
+      list.innerHTML = '';
+      txs.forEach(tx => {
+        const div = document.createElement('div');
+        div.className = 'small';
+        div.style.marginBottom = '0.5rem';
+        div.style.padding = '0.5rem';
+        div.style.background = 'rgba(255,255,255,0.03)';
+        div.style.borderRadius = '6px';
+        
+        const dirEmoji = tx.direction === 'buy' ? '📈' : '📉';
+        div.textContent = `${dirEmoji} ${tx.direction.toUpperCase()} ${formatNumber(tx.qty)} ${tx.base} @ ${formatNumber(tx.price)} ${tx.quote}`;
+        
+        list.appendChild(div);
+      });
+      
+      preview.style.display = 'block';
+      window._latestParsed = txs;
+    });
+    
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      document.getElementById('receiptInput').value = '';
+      document.getElementById('parsePreview').style.display = 'none';
+      window._latestParsed = null;
+    });
+    
+    document.getElementById('saveParsed').addEventListener('click', () => {
+      if (window._latestParsed && window._latestParsed.length > 0) {
+        addTransactions(window._latestParsed);
+        document.getElementById('parsePreview').style.display = 'none';
+        document.getElementById('receiptInput').value = '';
+        window._latestParsed = null;
+      } else {
+        showToast('No parsed transactions to save', 'error');
+      }
+    });
+    
+    document.getElementById('exportCsv').addEventListener('click', exportCSV);
+    document.getElementById('exportJson').addEventListener('click', exportJSON);
+    document.getElementById('importBtn').addEventListener('click', () => {
+      document.getElementById('importFile').click();
+    });
+    document.getElementById('importFile').addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        importJSON(e.target.files[0]);
+      }
+    });
+    document.getElementById('resetStore').addEventListener('click', resetStorage);
+    
+    // Settings change listeners
+    document.getElementById('matchingMode').addEventListener('change', (e) => {
+      store.settings.matchingMode = e.target.value;
+      saveStore();
+      rebuildBuysRemaining();
+      performMatching();
+      renderAll();
+    });
+    
+    document.getElementById('quoteCurrency').addEventListener('change', (e) => {
+      store.settings.quoteCurrency = e.target.value;
+      saveStore();
+      renderAll();
+    });
+    
+    document.getElementById('dateFormat').addEventListener('change', (e) => {
+      store.settings.dateFormat = e.target.value;
+      saveStore();
+      renderTransactions();
+    });
+    
+    // Initial render
+    renderAll();
+    
+    // Show welcome message
+    setTimeout(() => {
+      if (store.transactions.length === 0) {
+        showToast('Welcome! Paste your first receipt to get started 🚀', 'success');
+      }
+    }, 1000);
+  }
+
+  // Start the application when DOM is loaded
+  document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
